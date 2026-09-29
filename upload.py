@@ -36,7 +36,7 @@ import requests  # pip install requests
 # ── CONFIG — fill these in before running ─────────────────────────────────────
 API_KEY    = "cb4e25115c734f84b0376945e3f2a609"
 API_SECRET = "b/dFAgrUv22jLwARU7ilwFpTbWGbcvCGsFzj1BDEMk2LElwlqdfAeT+so5WhZGm2"
-API_BASE   = "https://rezolvedemo4.api.advancedcommerce.services"
+API_BASE   = "https://rezolvedemo5.api.advancedcommerce.services"
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -138,7 +138,8 @@ def upload_zip(zip_bytes: bytes, upload_type: str, headers: dict) -> str:
             if attempt == 3:
                 raise RuntimeError(
                     "Upload failed after 3 attempts. "
-                    "The API connection was interrupted while sending the ZIP."
+                    f"The API connection was interrupted while sending the ZIP: {error}. "
+                    "For a streaming retry, save the ZIP with --build-zip and retry using --zip-file."
                 ) from error
             delay = attempt * 10
             print(f"  Upload interrupted ({type(error).__name__}); retrying in {delay}s...", flush=True)
@@ -150,6 +151,11 @@ def upload_zip(zip_bytes: bytes, upload_type: str, headers: dict) -> str:
     print(f"  Body ({len(response.text)} chars): {response.text[:300] or '(empty)'}")
     print(f"  Headers: { {k:v for k,v in response.headers.items() if k.lower() in ('content-type','location','x-receipt-id','x-request-id')} }")
 
+    if response.status_code == 413:
+        raise RuntimeError(
+            f"Upload rejected with HTTP 413 (request too large): {len(zip_bytes) / 1024 / 1024:.2f} MB. "
+            "Reduce the batch size or ask the console/API administrator to increase nginx's client_max_body_size."
+        )
     if not response.ok:
         raise RuntimeError(
             f"Upload failed {response.status_code}: {response.text[:500]}"
