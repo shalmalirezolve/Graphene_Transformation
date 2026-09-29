@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from ..config import PipelineConfig
 from ..helpers.cleaners import top_category_parts, primary_product_type, material_label
-from ..helpers.slugify import slugify
+from ..helpers.slugify import bounded_slugify, slugify
 
 
 # ── public entry point ────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ class _Collector:
         # ── Product type ──────────────────────────────────────────────────────
         raw_top = record.get("top_category")
         if raw_top:
-            pt_id = slugify(primary_product_type(raw_top))
+            pt_id = bounded_slugify(primary_product_type(raw_top))
             if pt_id and pt_id not in self.product_types:
                 parts = top_category_parts(raw_top)
                 label = parts[-1] if parts else pt_id
