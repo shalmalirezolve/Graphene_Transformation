@@ -197,3 +197,35 @@ AUTOPARTS_FITMENT_CONFIG = PipelineConfig(
         "fitment_attributes": FieldDef(source="attributes", default=[]),
     },
 )
+
+
+SHOPIFY_CONFIG = PipelineConfig(
+    locale="en-us",
+    currencies=["USD"],
+    fields={
+        "id":                FieldDef(source="id"),
+        "title":             FieldDef(source="title"),
+        "description":       FieldDef(source="description"),
+        "care_instructions": FieldDef(source="care_instructions", default=""),
+        "main_image":        FieldDef(source="images", transform=lambda value: value[0] if isinstance(value, list) and value else value, default=""),
+        "additional_images": FieldDef(source="images", default=[]),
+        "price":             FieldDef(source="price", default=0),
+        "original_price":    FieldDef(source="compare_at_price", default=0),
+        "colors":            FieldDef(source="colors", default=[]),
+        "sizes":             FieldDef(source="sizes", default=[]),
+        "brand":             FieldDef(source="brand"),
+        "gender":            FieldDef(source="gender", default=""),
+        "material":          FieldDef(source="material", default=""),
+        "stock_status":      FieldDef(source="availability", default="in stock"),
+        "rating":            FieldDef(source="rating", default=0),
+        "review_count":      FieldDef(source="review_count", default=0),
+        "top_category":      FieldDef(source="categories", transform=lambda value: value[0] if isinstance(value, list) and value else value, default=""),
+        "mid_category":      FieldDef(source="categories", transform=lambda value: value[1] if isinstance(value, list) and len(value) > 1 else None, default=None),
+        "base_category":     FieldDef(source="categories", transform=lambda value: value[2] if isinstance(value, list) and len(value) > 2 else None, default=None),
+        "category":          FieldDef(source="categories", default=[]),
+    },
+    in_stock_values=[
+        "in stock", "instock", "in_stock", "low stock", "low_stock",
+        "available", "true", "1", "yes", "active",
+    ],
+)
