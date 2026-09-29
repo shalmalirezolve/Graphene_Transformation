@@ -20,7 +20,7 @@ from ..helpers.cleaners import (
 )
 from ..helpers.features import build_features
 from ..helpers.prices import build_prices
-from ..helpers.slugify import slugify
+from ..helpers.slugify import bounded_slugify, slugify
 from ..helpers.variants import build_variants, build_warehousing
 
 
@@ -43,10 +43,10 @@ def build_product(record: Dict, config: PipelineConfig) -> Dict:
     enabled = _is_enabled(record.get("stock_status"), config.in_stock_values)
 
     # ── Resolve product type from cleaned top_level_category ──────────────────
-    product_type_id = config.product_type_map.get(
+    product_type_id = bounded_slugify(config.product_type_map.get(
         primary_product_type(top_raw),
         primary_product_type(top_raw),
-    ) or "general"
+    ))
 
     # ── URL / slug (use cleaned single category, not raw numpy string) ────────
     top_slug = slugify(primary_product_type(top_raw)) if top_raw else "products"
