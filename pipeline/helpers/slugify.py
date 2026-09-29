@@ -4,6 +4,7 @@ URL slug generator — no external dependencies.
 "Off Shoulder Linen Jumpsuit" → "off-shoulder-linen-jumpsuit"
 """
 import re
+import hashlib
 import unicodedata
 from typing import Optional
 
@@ -22,6 +23,17 @@ def slugify(text: Optional[str]) -> str:
     # Collapse repeated hyphens
     collapsed  = re.sub(r"-+", "-", hyphenated)
     return collapsed.strip("-")
+
+
+def bounded_slugify(text: Optional[str], max_length: int = 100) -> str:
+    """Create a stable slug that fits GrapheneHC identifier limits."""
+    slug = slugify(text)
+    if len(slug) <= max_length:
+        return slug
+
+    digest = hashlib.sha1(slug.encode("utf-8")).hexdigest()[:8]
+    prefix_length = max_length - len(digest) - 1
+    return f"{slug[:prefix_length].rstrip('-')}-{digest}"
 
 
 def build_slugs(title: str, locale: str) -> dict:
